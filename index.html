@@ -88,10 +88,10 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 40px;
-            border-radius: 15px;
+            padding: 24px;
+            border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            max-width: 400px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -118,18 +118,20 @@
         }
 
         .settings-panel h2 {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            font-size: 18px;
             color: #333;
         }
 
         .setting-group {
-            margin-bottom: 25px;
+            margin-bottom: 16px;
             text-align: left;
         }
 
         .setting-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
             font-weight: bold;
             color: #555;
         }
@@ -137,10 +139,10 @@
         .setting-group input[type="number"],
         .setting-group input[type="file"],
         .setting-group input[type="checkbox"] {
-            padding: 10px;
-            border: 2px solid #ddd;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .setting-group input[type="number"],
@@ -150,7 +152,7 @@
 
         .setting-group input[type="checkbox"] {
             width: auto;
-            margin-right: 10px;
+            margin-right: 8px;
         }
 
         .checkbox-label {
@@ -160,52 +162,74 @@
         }
 
         .bell-settings {
-            border: 2px solid #ddd;
-            padding: 15px;
+            border: 1px solid #ddd;
+            padding: 10px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .bell-item {
             display: flex;
-            gap: 10px;
+            flex-wrap: nowrap;
+            gap: 5px;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+
+        .bell-item span {
+            font-size: 13px;
+            color: #555;
+            white-space: nowrap;
         }
 
         .bell-item input {
-            flex: 1;
-        }
-
-        .bell-item .time-input {
-            flex: 2;
+            width: 48px;
+            min-width: 0;
+            text-align: center;
+            padding: 4px 2px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         .bell-item button {
-            font-size: 16px;
-            padding: 8px 16px;
-            border-radius: 5px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
             width: auto;
             height: auto;
+            margin-left: auto;
+            flex-shrink: 0;
         }
 
         .add-bell-btn {
-            margin-top: 10px;
-            font-size: 16px;
-            padding: 10px 20px;
+            margin-top: 6px;
+            font-size: 13px;
+            padding: 6px 14px;
+        }
+
+        .bell-error {
+            font-size: 12px;
+            color: #e53935;
+            margin-top: -4px;
+            margin-bottom: 6px;
+        }
+
+        .bell-item input.invalid {
+            border-color: #e53935;
         }
 
         .settings-buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: flex-end;
-            margin-top: 25px;
+            margin-top: 16px;
         }
 
         .settings-buttons button {
-            font-size: 18px;
-            padding: 12px 24px;
-            border-radius: 8px;
+            font-size: 14px;
+            padding: 8px 18px;
+            border-radius: 6px;
             width: auto;
             height: auto;
         }
@@ -362,34 +386,65 @@
             addBellInput(timeValue = 30, countValue = 1, index = null) {
                 const bellItem = document.createElement('div');
                 bellItem.className = 'bell-item';
-                
+
+                const label1 = document.createElement('span');
+                label1.textContent = '残り';
+
                 const timeInput = document.createElement('input');
                 timeInput.type = 'number';
                 timeInput.value = timeValue;
                 timeInput.min = '1';
-                timeInput.placeholder = '残り時間（秒）';
-                timeInput.className = 'time-input';
-                
+
+                const label2 = document.createElement('span');
+                label2.textContent = '秒で';
+
                 const countInput = document.createElement('input');
                 countInput.type = 'number';
                 countInput.value = countValue;
                 countInput.min = '1';
                 countInput.max = '10';
-                countInput.placeholder = '回数';
-                
+
+                const label3 = document.createElement('span');
+                label3.textContent = '回鳴らす';
+
                 const removeBtn = document.createElement('button');
                 removeBtn.textContent = '削除';
                 removeBtn.addEventListener('click', () => bellItem.remove());
-                
+
+                bellItem.appendChild(label1);
                 bellItem.appendChild(timeInput);
+                bellItem.appendChild(label2);
                 bellItem.appendChild(countInput);
+                bellItem.appendChild(label3);
                 bellItem.appendChild(removeBtn);
                 this.bellSettings.appendChild(bellItem);
             }
 
             saveSettings() {
                 const newTotalTime = parseInt(this.totalTimeInput.value);
+
+                // 既存のエラー表示をリセット
+                this.bellSettings.querySelectorAll('.bell-error').forEach(el => el.remove());
+                this.bellSettings.querySelectorAll('input.invalid').forEach(el => el.classList.remove('invalid'));
+
                 const bellItems = this.bellSettings.querySelectorAll('.bell-item');
+                let hasError = false;
+
+                bellItems.forEach(item => {
+                    const timeInput = item.querySelectorAll('input[type="number"]')[0];
+                    const bellTime = parseInt(timeInput.value);
+                    if (!isNaN(bellTime) && bellTime >= newTotalTime) {
+                        timeInput.classList.add('invalid');
+                        const err = document.createElement('div');
+                        err.className = 'bell-error';
+                        err.textContent = `残り時間は総時間（${newTotalTime}秒）より短くしてください`;
+                        item.insertAdjacentElement('afterend', err);
+                        hasError = true;
+                    }
+                });
+
+                if (hasError) return;
+
                 const newBellTimes = Array.from(bellItems)
                     .map(item => {
                         const inputs = item.querySelectorAll('input[type="number"]');
@@ -399,7 +454,7 @@
                         };
                     })
                     .filter(bell => !isNaN(bell.time) && !isNaN(bell.count) && bell.time > 0 && bell.count > 0)
-                    .sort((a, b) => b.time - a.time); // 時間で降順ソート
+                    .sort((a, b) => b.time - a.time);
 
                 this.totalSeconds = newTotalTime;
                 this.bellTimes = newBellTimes;
