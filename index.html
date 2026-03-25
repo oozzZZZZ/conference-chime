@@ -312,6 +312,11 @@
 
             initAudioContext() {
                 this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                fetch('asset/bell01.mp3')
+                    .then(res => res.arrayBuffer())
+                    .then(buf => this.audioContext.decodeAudioData(buf, decoded => {
+                        this.customAudio = decoded;
+                    }));
             }
 
             loadSettings() {
