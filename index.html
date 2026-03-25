@@ -50,7 +50,7 @@
             bottom: 20px;
             right: 20px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 10px;
         }
 
@@ -62,8 +62,8 @@
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: #333;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
             box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.2s;
             display: flex;
@@ -72,7 +72,7 @@
         }
 
         button:hover {
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(0, 0, 0, 0.35);
             transform: scale(1.1);
             box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.4);
         }
@@ -81,7 +81,18 @@
             transform: scale(1.05);
         }
 
-        .settings-panel {
+        .controls button svg,
+        .controls button img {
+            width: 26px;
+            height: 26px;
+        }
+
+        .controls button img {
+            filter: invert(1);
+        }
+
+        .settings-panel,
+        .help-panel {
             display: none;
             position: fixed;
             top: 50%;
@@ -98,8 +109,95 @@
             z-index: 1000;
         }
 
-        .settings-panel.active {
+        .settings-panel.active,
+        .help-panel.active {
             display: block;
+        }
+
+        .help-panel h2 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .help-section {
+            margin-bottom: 18px;
+        }
+
+        .help-section h3 {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .help-section p,
+        .help-section li {
+            font-size: 13px;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .help-section ul {
+            padding-left: 16px;
+        }
+
+        .help-section li {
+            margin-bottom: 4px;
+        }
+
+        .help-color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #444;
+        }
+
+        .help-color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .help-disclaimer {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .help-link {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .help-link:hover {
+            text-decoration: underline;
+        }
+
+        .help-close-btn {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        .help-close-btn button {
+            font-size: 14px;
+            padding: 8px 18px;
+            border-radius: 6px;
+            width: auto;
+            height: auto;
+            background-color: #eee;
+            color: #333;
+        }
+
+        .help-close-btn button:hover {
+            background-color: #ddd;
+            transform: none;
         }
 
         .overlay {
@@ -226,6 +324,18 @@
             margin-top: 16px;
         }
 
+        .settings-panel button,
+        .help-panel button {
+            color: #333;
+            background-color: #eee;
+        }
+
+        .settings-panel button:hover,
+        .help-panel button:hover {
+            background-color: #ddd;
+            transform: none;
+        }
+
         .settings-buttons button {
             font-size: 14px;
             padding: 8px 18px;
@@ -247,10 +357,22 @@
     </div>
     
     <div class="controls">
-        <button id="startBtn" title="開始">▶️</button>
-        <button id="resetBtn" title="リセット">🔄</button>
-        <button id="bellBtn" title="ベル">🔔</button>
-        <button id="settingsBtn" title="設定">⚙️</button>
+        <button id="startBtn" title="開始 (Space)">
+            <img class="icon-play" src="asset/icons/play.svg" alt="開始">
+            <img class="icon-pause" src="asset/icons/pause.svg" alt="一時停止" style="display:none">
+        </button>
+        <button id="resetBtn" title="リセット (R)">
+            <img src="asset/icons/restart.svg" alt="リセット">
+        </button>
+        <button id="bellBtn" title="ベル (B)">
+            <img src="asset/icons/bell.svg" alt="ベル">
+        </button>
+        <button id="settingsBtn" title="設定">
+            <img src="asset/icons/settings.svg" alt="設定">
+        </button>
+        <button id="helpBtn" title="ヘルプ">
+            <img src="asset/icons/help.svg" alt="ヘルプ">
+        </button>
     </div>
 
     <div class="overlay" id="overlay"></div>
@@ -260,6 +382,11 @@
         <div class="setting-group">
             <label for="totalTime">総時間（秒）:</label>
             <input type="number" id="totalTime" value="180" min="1">
+        </div>
+
+        <div class="setting-group">
+            <label for="endBellCount">終了時のベル回数:</label>
+            <input type="number" id="endBellCount" value="2" min="1" max="10">
         </div>
 
         <div class="setting-group">
@@ -286,6 +413,62 @@
         </div>
     </div>
 
+    <div class="help-panel" id="helpPanel">
+        <h2>使い方</h2>
+
+        <div class="help-section">
+            <h3>ボタンの説明</h3>
+            <ul>
+                <li><strong>▶ / ⏸ 開始・一時停止</strong>：タイマーを開始、または一時停止します。</li>
+                <li><strong>↺ リセット</strong>：タイマーを最初から再開します。「リセット後すぐに再開する」がオンの場合は自動で再スタートします。</li>
+                <li><strong>🔔 ベル</strong>：今すぐベルを2回鳴らします。音が出るか確認するときに使えます。</li>
+                <li><strong>⚙ 設定</strong>：総時間・予備鈴・終了時のベル回数などを変更できます。</li>
+                <li><strong>? ヘルプ</strong>：このヘルプを表示します。</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>背景色の変わるタイミング</h3>
+            <div class="help-color-row">
+                <div class="help-color-dot" style="background:#4CAF50"></div>
+                <span><strong>緑</strong>：通常時間内</span>
+            </div>
+            <div class="help-color-row">
+                <div class="help-color-dot" style="background:#FFC107"></div>
+                <span><strong>黄</strong>：残り時間が少なくなってきた目安</span>
+            </div>
+            <div class="help-color-row">
+                <div class="help-color-dot" style="background:#f44336"></div>
+                <span><strong>赤</strong>：まもなく終了</span>
+            </div>
+            <div class="help-color-row">
+                <div class="help-color-dot" style="background:#000;border:1px solid #ccc"></div>
+                <span><strong>赤黒点滅</strong>：時間超過中</span>
+            </div>
+            <p style="margin-top:8px">切り替わるタイミングは予備鈴の設定数によって変わります。</p>
+            <ul style="margin-top:6px">
+                <li><strong>予備鈴なし</strong>：総時間の1/2で黄、1/4で赤</li>
+                <li><strong>予備鈴1個</strong>：設定した残り時間になったら赤（黄なし）</li>
+                <li><strong>予備鈴2個以上</strong>：2番目に遅い予備鈴で黄、最も遅い予備鈴で赤</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <h3>免責事項</h3>
+            <p class="help-disclaimer">本アプリは発表時間の目安としてご利用ください。ブラウザのタブが非アクティブな状態やデバイスの省電力設定によっては、タイマーの精度が低下する場合があります。重要な場面での単独使用はお控えください。</p>
+        </div>
+
+        <div class="help-section">
+            <h3>不具合・要望</h3>
+            <p class="help-disclaimer">問題が発生した場合や機能のご要望は、GitHubのIssueよりご報告ください。<br>
+            <a class="help-link" href="https://github.com/oozzZZZZ/conference-chime/issues" target="_blank" rel="noopener">https://github.com/oozzZZZZ/conference-chime/issues</a></p>
+        </div>
+
+        <div class="help-close-btn">
+            <button id="helpCloseBtn">閉じる</button>
+        </div>
+    </div>
+
     <script>
         class Timer {
             constructor() {
@@ -294,6 +477,7 @@
                 this.isRunning = false;
                 this.intervalId = null;
                 this.bellTimes = [{time: 60, count: 1}, {time: 30, count: 1}]; // デフォルト: 1分前1回、30秒前1回
+                this.endBellCount = 2;
                 this.bellRung = new Set();
                 this.customAudio = null;
                 this.audioContext = null;
@@ -322,6 +506,10 @@
                 this.bellSettings = document.getElementById('bellSettings');
                 this.addBellBtn = document.getElementById('addBellBtn');
                 this.autoRestartCheckbox = document.getElementById('autoRestart');
+                this.endBellCountInput = document.getElementById('endBellCount');
+                this.helpBtn = document.getElementById('helpBtn');
+                this.helpPanel = document.getElementById('helpPanel');
+                this.helpCloseBtn = document.getElementById('helpCloseBtn');
 
                 this.startBtn.addEventListener('click', () => this.toggleTimer());
                 this.resetBtn.addEventListener('click', () => this.reset());
@@ -329,9 +517,11 @@
                 this.settingsBtn.addEventListener('click', () => this.openSettings());
                 this.saveBtn.addEventListener('click', () => this.saveSettings());
                 this.cancelBtn.addEventListener('click', () => this.closeSettings());
-                this.overlay.addEventListener('click', () => this.closeSettings());
+                this.overlay.addEventListener('click', () => { this.closeSettings(); this.closeHelp(); });
                 this.addBellBtn.addEventListener('click', () => this.addBellInput());
                 this.audioFileInput.addEventListener('change', (e) => this.loadCustomAudio(e));
+                this.helpBtn.addEventListener('click', () => this.openHelp());
+                this.helpCloseBtn.addEventListener('click', () => this.closeHelp());
             }
 
             initAudioContext() {
@@ -350,6 +540,7 @@
                     this.totalSeconds = settings.totalSeconds || 180;
                     this.bellTimes = settings.bellTimes || [{time: 60, count: 1}, {time: 30, count: 1}];
                     this.autoRestart = settings.autoRestart !== undefined ? settings.autoRestart : true;
+                    this.endBellCount = settings.endBellCount || 2;
                     this.remainingSeconds = this.totalSeconds;
                 }
             }
@@ -358,7 +549,8 @@
                 const settings = {
                     totalSeconds: this.totalSeconds,
                     bellTimes: this.bellTimes,
-                    autoRestart: this.autoRestart
+                    autoRestart: this.autoRestart,
+                    endBellCount: this.endBellCount
                 };
                 localStorage.setItem('timerSettings', JSON.stringify(settings));
             }
@@ -366,6 +558,7 @@
             openSettings() {
                 this.totalTimeInput.value = this.totalSeconds;
                 this.autoRestartCheckbox.checked = this.autoRestart;
+                this.endBellCountInput.value = this.endBellCount;
                 this.renderBellInputs();
                 this.settingsPanel.classList.add('active');
                 this.overlay.classList.add('active');
@@ -373,6 +566,16 @@
 
             closeSettings() {
                 this.settingsPanel.classList.remove('active');
+                this.overlay.classList.remove('active');
+            }
+
+            openHelp() {
+                this.helpPanel.classList.add('active');
+                this.overlay.classList.add('active');
+            }
+
+            closeHelp() {
+                this.helpPanel.classList.remove('active');
                 this.overlay.classList.remove('active');
             }
 
@@ -459,6 +662,7 @@
                 this.totalSeconds = newTotalTime;
                 this.bellTimes = newBellTimes;
                 this.autoRestart = this.autoRestartCheckbox.checked;
+                this.endBellCount = parseInt(this.endBellCountInput.value) || 2;
                 this.reset();
                 this.saveSettingsToStorage();
                 this.closeSettings();
@@ -526,8 +730,9 @@
                 if (this.isRunning) return;
                 
                 this.isRunning = true;
-                this.startBtn.textContent = '⏸️';
-                this.startBtn.title = '一時停止';
+                this.startBtn.querySelector('.icon-play').style.display = 'none';
+                this.startBtn.querySelector('.icon-pause').style.display = '';
+                this.startBtn.title = '一時停止 (Space)';
                 
                 this.intervalId = setInterval(() => {
                     this.remainingSeconds--;
@@ -536,15 +741,16 @@
                     this.checkBells();
 
                     if (this.remainingSeconds === 0) {
-                        this.ringBell(2); // 終了ベル2回
+                        this.ringBell(this.endBellCount);
                     }
                 }, 1000);
             }
 
             pause() {
                 this.isRunning = false;
-                this.startBtn.textContent = '▶️';
-                this.startBtn.title = '開始';
+                this.startBtn.querySelector('.icon-play').style.display = '';
+                this.startBtn.querySelector('.icon-pause').style.display = 'none';
+                this.startBtn.title = '開始 (Space)';
                 clearInterval(this.intervalId);
                 this.stopBlinking();
             }
@@ -559,7 +765,7 @@
                     this.start();
                 } else {
                     this.startBtn.textContent = '▶️';
-                    this.startBtn.title = '開始';
+                    this.startBtn.title = '開始 (Space)';
                 }
             }
 
@@ -587,14 +793,39 @@
                 body.classList.remove('green', 'yellow', 'red', 'black');
 
                 if (this.remainingSeconds < 0) {
-                    // 点滅開始
                     this.startBlinking();
-                } else {
-                    this.stopBlinking();
-                    
-                    if (this.remainingSeconds <= 15) {
+                    return;
+                }
+
+                this.stopBlinking();
+
+                const r = this.remainingSeconds;
+                const n = this.bellTimes.length;
+
+                if (n === 0) {
+                    // ベル設定なし: 1/4以下→赤、1/2以下→黄、それ以外→緑
+                    if (r <= this.totalSeconds / 4) {
                         body.classList.add('red');
-                    } else if (this.bellTimes.length > 0 && this.remainingSeconds <= this.bellTimes[0].time) {
+                    } else if (r <= this.totalSeconds / 2) {
+                        body.classList.add('yellow');
+                    } else {
+                        body.classList.add('green');
+                    }
+                } else if (n === 1) {
+                    // ベル1個: 設定時間以下→赤、それ以外→緑
+                    if (r <= this.bellTimes[0].time) {
+                        body.classList.add('red');
+                    } else {
+                        body.classList.add('green');
+                    }
+                } else {
+                    // ベル2個以上: bellTimesは降順ソート済み
+                    // 最後（最小時間）以下→赤、2番目以下→黄、それ以外→緑
+                    const lastTime = this.bellTimes[n - 1].time;
+                    const secondLastTime = this.bellTimes[n - 2].time;
+                    if (r <= lastTime) {
+                        body.classList.add('red');
+                    } else if (r <= secondLastTime) {
                         body.classList.add('yellow');
                     } else {
                         body.classList.add('green');
@@ -626,6 +857,23 @@
         let timer;
         window.addEventListener('DOMContentLoaded', () => {
             timer = new Timer();
+
+            document.addEventListener('keydown', (e) => {
+                // モーダルが開いている間は無効
+                if (timer.settingsPanel.classList.contains('active') ||
+                    timer.helpPanel.classList.contains('active')) return;
+                // 入力欄にフォーカス中は無効
+                if (e.target.tagName === 'INPUT') return;
+
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    timer.toggleTimer();
+                } else if (e.key === 'r' || e.key === 'R') {
+                    timer.reset();
+                } else if (e.key === 'b' || e.key === 'B') {
+                    timer.ringBell(2);
+                }
+            });
         });
     </script>
 </body>
